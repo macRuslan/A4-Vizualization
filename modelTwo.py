@@ -33,7 +33,7 @@ st.markdown("""
 # Load the dataset
 @st.cache_data
 def load_data():
-    data = pd.read_csv('/Users/ruslankhissamiyev/Desktop/BUSA 8031 A4/A4-Vizualization/Datasets/kaggle.csv')
+    data = pd.read_csv('kaggle.csv')
     return data
 
 data = load_data()
