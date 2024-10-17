@@ -1,12 +1,3 @@
-The error is occurring because of the use of `facet_col` in the scatter plot. It seems like the dataset does not have enough unique `age` values, or the spacing for the facets is causing an issue. To fix this, we can either remove the `facet_col` or simplify the faceting.
-
-Let’s try removing the `facet_col` from the scatter plot and check if the plot works fine without it.
-
-Here’s the updated code with `facet_col` removed from the scatter plot:
-
-### Updated Code:
-
-```python
 # Import python packages
 import streamlit as st
 import pandas as pd
