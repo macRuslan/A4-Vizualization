@@ -75,18 +75,30 @@ if hypertension:
 if st.checkbox('Show Dataset'):
     st.write(data)
 
-# --- New Chart: Occurrences of Men vs Women ---
-st.subheader('Number of Occurrences: Men vs Women')
-gender_counts = data['gender'].value_counts()
-fig = px.bar(gender_counts, x=gender_counts.index, y=gender_counts.values, labels={'x': 'Gender', 'y': 'Count'})
-st.plotly_chart(fig)
+# --- New Visualization: Pair Plot for Lifestyle Factors ---
+st.subheader('Lifestyle Factors Amplify Risk: Correlation Between BMI, Glucose, Smoking, and Stroke Outcome')
 
-# --- New Chart: Percentage of Men vs Women Affected by Strokes ---
-st.subheader('Percentage of Men vs Women Affected by Strokes')
-stroke_by_gender = data.groupby('gender')['stroke'].mean() * 100
-fig = px.pie(stroke_by_gender, values=stroke_by_gender.values, names=stroke_by_gender.index,
-             title='Percentage of Men vs Women Affected by Stroke')
-st.plotly_chart(fig)
+# Convert smoking status to categorical for better plotting
+data['smoking_status'] = data['smoking_status'].astype('category')
+
+# Pair plot to show relationships between BMI, glucose, smoking, and stroke
+sns.set(style="white")
+pairplot_fig = sns.pairplot(data, hue='stroke', vars=['bmi', 'avg_glucose_level', 'smoking_status'],
+                            palette="Set1", diag_kind="kde", markers=["o", "s"])
+st.pyplot(pairplot_fig)
+
+# --- New Visualization: Violin Plot for Lifestyle Factors ---
+st.subheader('Distribution of Stroke Risk by Smoking, BMI, and Glucose Levels')
+
+# Create violin plot for stroke risk across smoking status and BMI
+fig, ax = plt.subplots(figsize=(10, 6), facecolor='black')
+sns.violinplot(x='smoking_status', y='bmi', hue='stroke', data=data, split=True, palette="muted", ax=ax)
+ax.set_facecolor('black')  # Set the figure background to black
+ax.tick_params(colors='white')  # Set tick labels to white
+ax.yaxis.label.set_color('white')  # Set y-axis label color to white
+ax.xaxis.label.set_color('white')  # Set x-axis label color to white
+ax.title.set_color('white')  # Set title color to white
+st.pyplot(fig)
 
 # Interactive Correlation Heatmap
 st.subheader('Interactive Correlation Heatmap')
@@ -192,5 +204,3 @@ models = pd.DataFrame({
                       roc_auc_score(y_test, rf_y_pred_proba) if len(set(y_test)) > 1 else 'N/A']
 })
 st.write(models)
-
-# Added back dasboards
