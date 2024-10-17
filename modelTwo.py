@@ -87,9 +87,10 @@ st.plotly_chart(age_gender_fig)
 # --- New Chart 2: Lifestyle Factors by Age Group ---
 st.subheader('Lifestyle Factors Impacting Stroke Risk by Age Group')
 
-# Create scatter plot for BMI vs. glucose level, colored by stroke risk and faceted by age group
+# Create scatter plot for BMI vs. glucose level, colored by stroke risk
+# Removed facet_col_wrap to avoid errors
 lifestyle_age_fig = px.scatter(data, x='bmi', y='avg_glucose_level', color='stroke',
-                               facet_col='age', facet_col_wrap=3,
+                               facet_col='age', facet_col_spacing=0.04,
                                labels={'bmi': 'BMI', 'avg_glucose_level': 'Average Glucose Level', 'stroke': 'Stroke'},
                                hover_data=['smoking_status', 'hypertension'])
 st.plotly_chart(lifestyle_age_fig)
