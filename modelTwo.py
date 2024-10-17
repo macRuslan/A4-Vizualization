@@ -75,54 +75,55 @@ if hypertension:
 if st.checkbox('Show Dataset'):
     st.write(data)
 
-# --- New Visualization: Pair Plot for Lifestyle Factors ---
-st.subheader('Lifestyle Factors Amplify Risk: Correlation Between BMI, Glucose, and Stroke Outcome')
+# --- New Chart 1: Age vs. Stroke Risk by Gender ---
+st.subheader('Stroke Risk by Age and Gender')
 
-# Pair plot to show relationships between BMI, glucose, and stroke
-sns.set(style="white")
-pairplot_fig = sns.pairplot(data, hue='stroke', vars=['bmi', 'avg_glucose_level'], palette="Set1", diag_kind="kde", markers=["o", "s"])
-st.pyplot(pairplot_fig)
+# Create a bar plot for stroke risk by age and gender
+age_gender_fig = px.histogram(data, x='age', color='gender', barmode='group',
+                              labels={'age': 'Age', 'gender': 'Gender'},
+                              hover_data=['stroke', 'smoking_status', 'bmi'])
+st.plotly_chart(age_gender_fig)
 
-# --- New Visualization: Violin Plot for Lifestyle Factors ---
-st.subheader('Distribution of Stroke Risk by Smoking, BMI, and Glucose Levels')
+# --- New Chart 2: Lifestyle Factors by Age Group ---
+st.subheader('Lifestyle Factors Impacting Stroke Risk by Age Group')
 
-# Create violin plot for stroke risk across smoking status and BMI
-fig, ax = plt.subplots(figsize=(10, 6), facecolor='black')
-sns.violinplot(x='smoking_status', y='bmi', hue='stroke', data=data, split=True, palette="muted", ax=ax)
-ax.set_facecolor('black')  # Set the figure background to black
-ax.tick_params(colors='white')  # Set tick labels to white
-ax.yaxis.label.set_color('white')  # Set y-axis label color to white
-ax.xaxis.label.set_color('white')  # Set x-axis label color to white
-ax.title.set_color('white')  # Set title color to white
-st.pyplot(fig)
+# Create scatter plot for BMI vs. glucose level, colored by stroke risk and faceted by age group
+lifestyle_age_fig = px.scatter(data, x='bmi', y='avg_glucose_level', color='stroke',
+                               facet_col='age', facet_col_wrap=3,
+                               labels={'bmi': 'BMI', 'avg_glucose_level': 'Average Glucose Level', 'stroke': 'Stroke'},
+                               hover_data=['smoking_status', 'hypertension'])
+st.plotly_chart(lifestyle_age_fig)
 
-# Interactive Correlation Heatmap
-st.subheader('Interactive Correlation Heatmap')
-corr = data[['age', 'hypertension', 'heart_disease', 'avg_glucose_level', 'bmi', 'stroke']].corr()
-fig = px.imshow(corr, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r')
-st.plotly_chart(fig)
+# --- New Chart 3: Stroke Risk for Older Men vs. Women with Lifestyle Factors ---
+st.subheader('Stroke Risk for Older Men vs. Women by Lifestyle Factors')
 
-# Stroke Distribution by Smoking Status
-st.subheader('Stroke Distribution by Smoking Status')
-fig = px.histogram(data, x='smoking_status', color='stroke', barmode='group',
-                   category_orders={'smoking_status': ['never smoked', 'formerly smoked', 'smokes', 'Unknown']},
-                   labels={'stroke': 'Stroke', 'smoking_status': 'Smoking Status'},
-                   hover_data=['age', 'hypertension', 'heart_disease'])
-st.plotly_chart(fig)
+# Filter data for older men and women (55 and above)
+older_data = data[data['age'] >= 55]
 
-# BMI vs. Average Glucose Level Scatter Plot
-st.subheader('BMI vs. Average Glucose Level')
-fig = px.scatter(data, x='bmi', y='avg_glucose_level', color='stroke',
-                 labels={'bmi': 'BMI', 'avg_glucose_level': 'Average Glucose Level', 'stroke': 'Stroke'},
-                 hover_data=['age', 'hypertension', 'heart_disease'])
-st.plotly_chart(fig)
+# Create a box plot showing stroke risk based on smoking status, BMI, and glucose levels, for men and women
+boxplot_fig = px.box(older_data, x='gender', y='bmi', color='stroke', facet_row='smoking_status',
+                     labels={'bmi': 'BMI', 'smoking_status': 'Smoking Status', 'stroke': 'Stroke'},
+                     hover_data=['avg_glucose_level', 'hypertension'])
+st.plotly_chart(boxplot_fig)
 
-# Age Distribution with Stroke Outcome
-st.subheader('Age Distribution with Stroke Outcome')
-fig = px.histogram(data, x='age', color='stroke', nbins=50, opacity=0.7,
-                   labels={'age': 'Age', 'stroke': 'Stroke'},
-                   hover_data=['bmi', 'avg_glucose_level'])
-st.plotly_chart(fig)
+# --- New Chart 4: Age-Specific Stroke Predictors (Heatmap) ---
+st.subheader('Stroke Predictors by Age Groups (Under 55 vs. Over 55)')
+
+# Split data into under 55 and over 55 groups for comparison
+data_under_55 = data[data['age'] < 55]
+data_over_55 = data[data['age'] >= 55]
+
+# Correlation heatmap for individuals under 55
+st.subheader('Correlation for Individuals Under 55')
+corr_under_55 = data_under_55[['age', 'hypertension', 'heart_disease', 'avg_glucose_level', 'bmi', 'stroke']].corr()
+fig_under_55 = px.imshow(corr_under_55, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r')
+st.plotly_chart(fig_under_55)
+
+# Correlation heatmap for individuals over 55
+st.subheader('Correlation for Individuals Over 55')
+corr_over_55 = data_over_55[['age', 'hypertension', 'heart_disease', 'avg_glucose_level', 'bmi', 'stroke']].corr()
+fig_over_55 = px.imshow(corr_over_55, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r')
+st.plotly_chart(fig_over_55)
 
 # Encode Categorical Variables
 data_encoded = pd.get_dummies(data, columns=['gender', 'ever_married', 'work_type', 'Residence_type', 'smoking_status'], drop_first=True)
