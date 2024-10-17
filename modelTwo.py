@@ -1,3 +1,4 @@
+# Import python packages
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -73,6 +74,19 @@ if hypertension:
 # Display dataset
 if st.checkbox('Show Dataset'):
     st.write(data)
+
+# --- New Chart: Occurrences of Men vs Women ---
+st.subheader('Number of Occurrences: Men vs Women')
+gender_counts = data['gender'].value_counts()
+fig = px.bar(gender_counts, x=gender_counts.index, y=gender_counts.values, labels={'x': 'Gender', 'y': 'Count'})
+st.plotly_chart(fig)
+
+# --- New Chart: Percentage of Men vs Women Affected by Strokes ---
+st.subheader('Percentage of Men vs Women Affected by Strokes')
+stroke_by_gender = data.groupby('gender')['stroke'].mean() * 100
+fig = px.pie(stroke_by_gender, values=stroke_by_gender.values, names=stroke_by_gender.index,
+             title='Percentage of Men vs Women Affected by Stroke')
+st.plotly_chart(fig)
 
 # Interactive Correlation Heatmap
 st.subheader('Interactive Correlation Heatmap')
@@ -178,3 +192,4 @@ models = pd.DataFrame({
                       roc_auc_score(y_test, rf_y_pred_proba) if len(set(y_test)) > 1 else 'N/A']
 })
 st.write(models)
+# Comment
