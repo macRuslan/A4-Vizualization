@@ -1,3 +1,12 @@
+The error is occurring because of the use of `facet_col` in the scatter plot. It seems like the dataset does not have enough unique `age` values, or the spacing for the facets is causing an issue. To fix this, we can either remove the `facet_col` or simplify the faceting.
+
+Let’s try removing the `facet_col` from the scatter plot and check if the plot works fine without it.
+
+Here’s the updated code with `facet_col` removed from the scatter plot:
+
+### Updated Code:
+
+```python
 # Import python packages
 import streamlit as st
 import pandas as pd
@@ -84,16 +93,14 @@ age_gender_fig = px.histogram(data, x='age', color='gender', barmode='group',
                               hover_data=['stroke', 'smoking_status', 'bmi'])
 st.plotly_chart(age_gender_fig)
 
-# --- New Chart 2: Lifestyle Factors by Age Group ---
-st.subheader('Lifestyle Factors Impacting Stroke Risk by Age Group')
+# --- Updated Chart 2: Lifestyle Factors without Facet ---
+st.subheader('Lifestyle Factors Impacting Stroke Risk')
 
 # Create scatter plot for BMI vs. glucose level, colored by stroke risk
-# Removed problematic facet_col_spacing to fix the error
-lifestyle_age_fig = px.scatter(data, x='bmi', y='avg_glucose_level', color='stroke',
-                               facet_col='age', 
-                               labels={'bmi': 'BMI', 'avg_glucose_level': 'Average Glucose Level', 'stroke': 'Stroke'},
-                               hover_data=['smoking_status', 'hypertension'])
-st.plotly_chart(lifestyle_age_fig)
+lifestyle_fig = px.scatter(data, x='bmi', y='avg_glucose_level', color='stroke',
+                           labels={'bmi': 'BMI', 'avg_glucose_level': 'Average Glucose Level', 'stroke': 'Stroke'},
+                           hover_data=['smoking_status', 'hypertension', 'age'])
+st.plotly_chart(lifestyle_fig)
 
 # --- New Chart 3: Stroke Risk for Older Men vs. Women with Lifestyle Factors ---
 st.subheader('Stroke Risk for Older Men vs. Women by Lifestyle Factors')
