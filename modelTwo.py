@@ -75,124 +75,117 @@ if hypertension:
 if st.checkbox('Show Dataset'):
     st.write(data)
 
-# --- New Chart 1: Age vs. Stroke Risk by Gender ---
-st.subheader('Stroke Risk by Age and Gender')
+# --- Original Visualization: Correlation Heatmap ---
+st.subheader('Original: Correlation Heatmap')
+corr = data[['age', 'hypertension', 'heart_disease', 'avg_glucose_level', 'bmi', 'stroke']].corr()
+fig = px.imshow(corr, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r')
+st.plotly_chart(fig)
 
-# Create a bar plot for stroke risk by age and gender
+# --- Original Visualization: Stroke Distribution by Smoking Status ---
+st.subheader('Original: Stroke Distribution by Smoking Status')
+fig = px.histogram(data, x='smoking_status', color='stroke', barmode='group',
+                   category_orders={'smoking_status': ['never smoked', 'formerly smoked', 'smokes', 'Unknown']},
+                   labels={'stroke': 'Stroke', 'smoking_status': 'Smoking Status'},
+                   hover_data=['age', 'hypertension', 'heart_disease'])
+st.plotly_chart(fig)
+
+# --- Original Visualization: BMI vs. Average Glucose Level Scatter Plot ---
+st.subheader('Original: BMI vs. Average Glucose Level')
+fig = px.scatter(data, x='bmi', y='avg_glucose_level', color='stroke',
+                 labels={'bmi': 'BMI', 'avg_glucose_level': 'Average Glucose Level', 'stroke': 'Stroke'},
+                 hover_data=['age', 'hypertension', 'heart_disease'])
+st.plotly_chart(fig)
+
+# --- Original Visualization: Age Distribution with Stroke Outcome ---
+st.subheader('Original: Age Distribution with Stroke Outcome')
+fig = px.histogram(data, x='age', color='stroke', nbins=50, opacity=0.7,
+                   labels={'age': 'Age', 'stroke': 'Stroke'},
+                   hover_data=['bmi', 'avg_glucose_level'])
+st.plotly_chart(fig)
+
+# --- New Visualization 1: Age vs. Stroke Risk by Gender ---
+st.subheader('New: Stroke Risk by Age and Gender')
 age_gender_fig = px.histogram(data, x='age', color='gender', barmode='group',
                               labels={'age': 'Age', 'gender': 'Gender'},
                               hover_data=['stroke', 'smoking_status', 'bmi'])
 st.plotly_chart(age_gender_fig)
 
-# --- Updated Chart 2: Lifestyle Factors without Facet ---
-st.subheader('Lifestyle Factors Impacting Stroke Risk')
-
-# Create scatter plot for BMI vs. glucose level, colored by stroke risk
+# --- New Visualization 2: Lifestyle Factors without Facet ---
+st.subheader('New: Lifestyle Factors Impacting Stroke Risk')
 lifestyle_fig = px.scatter(data, x='bmi', y='avg_glucose_level', color='stroke',
                            labels={'bmi': 'BMI', 'avg_glucose_level': 'Average Glucose Level', 'stroke': 'Stroke'},
                            hover_data=['smoking_status', 'hypertension', 'age'])
 st.plotly_chart(lifestyle_fig)
 
-# --- New Chart 3: Stroke Risk for Older Men vs. Women with Lifestyle Factors ---
-st.subheader('Stroke Risk for Older Men vs. Women by Lifestyle Factors')
-
-# Filter data for older men and women (55 and above)
+# --- New Visualization 3: Stroke Risk for Older Men vs. Women with Lifestyle Factors ---
+st.subheader('New: Stroke Risk for Older Men vs. Women by Lifestyle Factors')
 older_data = data[data['age'] >= 55]
-
-# Create a box plot showing stroke risk based on smoking status, BMI, and glucose levels, for men and women
 boxplot_fig = px.box(older_data, x='gender', y='bmi', color='stroke', facet_row='smoking_status',
                      labels={'bmi': 'BMI', 'smoking_status': 'Smoking Status', 'stroke': 'Stroke'},
                      hover_data=['avg_glucose_level', 'hypertension'])
 st.plotly_chart(boxplot_fig)
 
-# --- New Chart 4: Age-Specific Stroke Predictors (Heatmap) ---
-st.subheader('Stroke Predictors by Age Groups (Under 55 vs. Over 55)')
-
-# Split data into under 55 and over 55 groups for comparison
+# --- New Visualization 4: Age-Specific Stroke Predictors (Heatmap) ---
+st.subheader('New: Stroke Predictors by Age Groups (Under 55 vs. Over 55)')
 data_under_55 = data[data['age'] < 55]
 data_over_55 = data[data['age'] >= 55]
-
-# Correlation heatmap for individuals under 55
 st.subheader('Correlation for Individuals Under 55')
 corr_under_55 = data_under_55[['age', 'hypertension', 'heart_disease', 'avg_glucose_level', 'bmi', 'stroke']].corr()
 fig_under_55 = px.imshow(corr_under_55, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r')
 st.plotly_chart(fig_under_55)
-
-# Correlation heatmap for individuals over 55
 st.subheader('Correlation for Individuals Over 55')
 corr_over_55 = data_over_55[['age', 'hypertension', 'heart_disease', 'avg_glucose_level', 'bmi', 'stroke']].corr()
 fig_over_55 = px.imshow(corr_over_55, text_auto=True, aspect="auto", color_continuous_scale='RdBu_r')
 st.plotly_chart(fig_over_55)
 
-# Encode Categorical Variables
+# --- Model Training ---
 data_encoded = pd.get_dummies(data, columns=['gender', 'ever_married', 'work_type', 'Residence_type', 'smoking_status'], drop_first=True)
-
-# Feature Selection
 features = [col for col in data_encoded.columns if col not in ['id', 'stroke']]
 X = data_encoded[features]
 y = data_encoded['stroke']
-
-# Train-test Split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# Handling class imbalance with SMOTE
 smote = SMOTE(random_state=42)
 X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
 
-# Model Training - Logistic Regression
 model = LogisticRegression(max_iter=1000)
 model.fit(X_resampled, y_resampled)
-
-# Predictions
 y_pred = model.predict(X_test)
 y_pred_proba = model.predict_proba(X_test)[:,1]
 
-# Evaluation: Classification Report
 st.write('**Logistic Regression Classification Report:**')
 st.text(classification_report(y_test, y_pred, zero_division=0))
 
-# Check if both classes are present in y_test before calculating ROC AUC score
 if len(set(y_test)) > 1:
     st.write('**Logistic Regression ROC AUC Score:**', roc_auc_score(y_test, y_pred_proba))
 else:
     st.write('**ROC AUC Score cannot be calculated:** Only one class present in the selected data.')
 
-# Feature Importance with SHAP
 st.subheader('Feature Importance with SHAP Values')
-
-# Create a SHAP explainer and calculate SHAP values
 explainer = shap.Explainer(model, X_train)
 shap_values = explainer(X_test)
-
-# Create a Matplotlib figure for SHAP plot with dark theme
 fig, ax = plt.subplots(facecolor='black')
 shap.plots.bar(shap_values, max_display=10, show=False, ax=ax)
-ax.set_facecolor('black')  # Make the background black
-ax.tick_params(colors='white')  # Make the ticks white
-ax.yaxis.label.set_color('white')  # Set y-axis label color to white
-ax.xaxis.label.set_color('white')  # Set x-axis label color to white
-ax.title.set_color('white')  # Set title color to white
+ax.set_facecolor('black')
+ax.tick_params(colors='white')
+ax.yaxis.label.set_color('white')
+ax.xaxis.label.set_color('white')
+ax.title.set_color('white')
 st.pyplot(fig)
 
-# Alternative Model: Random Forest
 rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
 rf_model.fit(X_resampled, y_resampled)
-
-# Predictions
 rf_y_pred = rf_model.predict(X_test)
 rf_y_pred_proba = rf_model.predict_proba(X_test)[:,1]
 
-# Evaluation
 st.write('**Random Forest Classification Report:**')
 st.text(classification_report(y_test, rf_y_pred, zero_division=0))
 
-# Check if both classes are present in y_test before calculating ROC AUC score for Random Forest
 if len(set(y_test)) > 1:
     st.write('**Random Forest ROC AUC Score:**', roc_auc_score(y_test, rf_y_pred_proba))
 else:
     st.write('**ROC AUC Score cannot be calculated for Random Forest:** Only one class present in the selected data.')
 
-# Model Comparison
 st.subheader('Model Comparison')
 models = pd.DataFrame({
     'Model': ['Logistic Regression', 'Random Forest'],
