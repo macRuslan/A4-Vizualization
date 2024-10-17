@@ -76,15 +76,11 @@ if st.checkbox('Show Dataset'):
     st.write(data)
 
 # --- New Visualization: Pair Plot for Lifestyle Factors ---
-st.subheader('Lifestyle Factors Amplify Risk: Correlation Between BMI, Glucose, Smoking, and Stroke Outcome')
+st.subheader('Lifestyle Factors Amplify Risk: Correlation Between BMI, Glucose, and Stroke Outcome')
 
-# Convert smoking status to categorical for better plotting
-data['smoking_status'] = data['smoking_status'].astype('category')
-
-# Pair plot to show relationships between BMI, glucose, smoking, and stroke
+# Pair plot to show relationships between BMI, glucose, and stroke
 sns.set(style="white")
-pairplot_fig = sns.pairplot(data, hue='stroke', vars=['bmi', 'avg_glucose_level', 'smoking_status'],
-                            palette="Set1", diag_kind="kde", markers=["o", "s"])
+pairplot_fig = sns.pairplot(data, hue='stroke', vars=['bmi', 'avg_glucose_level'], palette="Set1", diag_kind="kde", markers=["o", "s"])
 st.pyplot(pairplot_fig)
 
 # --- New Visualization: Violin Plot for Lifestyle Factors ---
